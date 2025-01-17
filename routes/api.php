@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/getUserData', [HomeController::class, 'getUserData']);
+    Route::post('/validateToken', [HomeController::class, 'validateToken']);
+    Route::post('/addproduct', [HomeController::class, 'Addproduct']);
+    Route::post('/logout', [HomeController::class, 'Logout']);
+    Route::delete('/deleteproduct/{id}', [HomeController::class, 'Deleteproduct']);
 });
+
+Route::post('/login',[HomeController::class,'Login']);
+Route::post('/register',[HomeController::class,'Register']);
+Route::post('/products',[HomeController::class,'Products']);
