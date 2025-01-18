@@ -191,6 +191,19 @@ class HomeController extends Controller
         ]);
     }
 
+    public function Newproduct()
+    {
+        //   $product = Product::where('quantity', '>', 0)->paginate(9);
+        $product = Product::where('quantity', '>', 0)->where('product_status', 'New')->get();
+        $category = Category::orderBy('category_name', 'asc')->get();
+
+        return response()->json([
+            'status' => 200,
+            'products' => $product,
+            'category' => $category,
+        ]);
+    }
+
     public function Deleteproduct($id)
     {
 
