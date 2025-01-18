@@ -3,12 +3,13 @@
 
 # Run the Application 
 
-# .env and databasw will be send in telegram
-
+# .env and database are send withen telegram
 
 ## git clone https://github.com/NextjsE-Commerce/E-Commerce_Backend
 
 ## php artisan serve
+
+## for any issue contact me on 0970951608
 
 
 
