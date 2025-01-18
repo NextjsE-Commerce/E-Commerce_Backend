@@ -6,6 +6,11 @@
 # .env and databasw will be send in telegram
 
 
+## git clone https://github.com/NextjsE-Commerce/E-Commerce_Backend
+
+## php artisan serve
+
+
 
 
 
