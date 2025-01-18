@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -214,5 +215,44 @@ class HomeController extends Controller
             'status' => 200,
             'message' => "Product delated Successfully"
         ]);
+    }
+    public function AddtoCart(Request $request) {
+
+        $validatecart = Validator::make($request->all(), [
+            'product_id' => 'required',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $user = Auth::user();
+        $product = Product::find($request->product_id);
+
+        $cart = new Cart();
+
+        $cart->user_id = $user->id;
+        $cart->product_id = $request->product_id;
+        $cart->quantity = $request->quantity;
+        $cart->price = $product->price * $request->quantity;
+        $cart->image = $product->product_image;
+
+        // $cart = Cart::updateOrCreate(
+        //     ['user_id' => $user->id, 'product_id' => $product->id],
+        //     [
+        //         'quantity' => $request->quantity,
+        //         'price' => $product->price * $request->quantity,
+        //         'image' => $product->product_image,
+        //     ]
+        // );
+
+        $cart->save();
+
+        $itemsInCart = Cart::where('user_id', $user->id)->count();
+        $userCarts = Cart::where('user_id', $user->id)->get();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Product added to cart successfully!',
+            'items_in_cart' => $itemsInCart,
+            'cart' => $userCarts,
+        ], 200);
     }
 }

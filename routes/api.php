@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [HomeController::class, 'Logout']);
     Route::delete('/deleteproduct/{id}', [HomeController::class, 'Deleteproduct']);
     Route::post('/products',[HomeController::class,'Products']);
+    Route::post('/add_to_cart', [HomeController::class,'AddtoCart'] );
 });
 
 Route::post('/login',[HomeController::class,'Login']);
