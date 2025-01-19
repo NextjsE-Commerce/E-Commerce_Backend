@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products',[HomeController::class,'Products']);
     Route::post('/add_to_cart', [HomeController::class,'AddtoCart'] );
     Route::get('/itemincart', [HomeController::class, 'getItemInCart']);
-    Route::get('/usercart', [HomeController::class, 'userCart']);
+    Route::post('/usercart', [HomeController::class, 'userCart']);
 });
 
 Route::post('/login',[HomeController::class,'Login']);

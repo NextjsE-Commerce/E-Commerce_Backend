@@ -118,7 +118,11 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
+        
+
         if ($user) {
+
+            // $userCart = Cart::where("user_id", $user->id)->get()
             return response()->json([
                 'status' => 200,
                 'user' => $user,
@@ -280,18 +284,37 @@ class HomeController extends Controller
         );
     }
 
-    public function userCart(Request $req){
-        $user = Auth::user();
+    // public function userCart(Request $req){
+    //     $user = Auth::user();
 
-        $usercart = Cart::where('user_id', $user->id)->get();
+    //     $usercart = Cart::where('user_id', $user->id)->get();
 
-        $product = Product::where('id', $usercart->product_id)->first();
+    //     $product = Product::where('id', $usercart->product_id)->first();
 
-        return response()->json(
-            [
-                'user' => $usercart
-            ],
-            200
-        );
-    }
+    //     return response()->json(
+    //         [
+    //             'usercart' => $usercart,
+    //             'productstatus' => $product->product_status
+    //         ],
+    //         200
+    //     );
+    // }
+
+    public function userCart(Request $req) 
+    {
+    $user = Auth::user();
+    $usercart = Cart::where('user_id', $user->id)
+        ->get()
+        ->map(function ($cartItem,) {
+            $product = Product::find($cartItem->product_id);
+            $cartItem->product_name = $product->product_name;
+            $cartItem->product_status = $product->product_status;
+            return $cartItem;
+        });
+
+    return response()->json([
+        'usercart' => $usercart
+    ], 200);
+}
+
 }
