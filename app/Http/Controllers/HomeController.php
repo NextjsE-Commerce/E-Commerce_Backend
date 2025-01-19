@@ -216,43 +216,82 @@ class HomeController extends Controller
             'message' => "Product delated Successfully"
         ]);
     }
-    public function AddtoCart(Request $request) {
+    public function AddtoCart(Request $request)
+    {
 
         $validatecart = Validator::make($request->all(), [
-            'product_id' => 'required',
+            'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
         ]);
+
+        if ($validatecart->fails()) {
+            return response()->json([
+                'status' => 400,
+                'errors' => $validatecart->errors(),
+            ], 400);
+        }
 
         $user = Auth::user();
         $product = Product::find($request->product_id);
 
-        $cart = new Cart();
+        $cart = Cart::where('user_id', $user->id)
+        ->where('product_id', $product->id)
+        ->first();
 
-        $cart->user_id = $user->id;
-        $cart->product_id = $request->product_id;
-        $cart->quantity = $request->quantity;
-        $cart->price = $product->price * $request->quantity;
-        $cart->image = $product->product_image;
 
-        // $cart = Cart::updateOrCreate(
-        //     ['user_id' => $user->id, 'product_id' => $product->id],
-        //     [
-        //         'quantity' => $request->quantity,
-        //         'price' => $product->price * $request->quantity,
-        //         'image' => $product->product_image,
-        //     ]
-        // );
-
-        $cart->save();
-
+        if ($cart) {
+            $cart->quantity += $request->quantity; 
+            $cart->price = $product->price * $cart->quantity; 
+            $cart->image = $product->product_image;
+            $cart->save();
+        } else {
+            $cart = new Cart();
+            $cart->user_id = $user->id;
+            $cart->product_id = $product->id;
+            $cart->quantity = $request->quantity;
+            $cart->price = $product->price * $request->quantity;
+            $cart->image = $product->product_image;
+            $cart->save();
+        }
+    
         $itemsInCart = Cart::where('user_id', $user->id)->count();
         $userCarts = Cart::where('user_id', $user->id)->get();
-
+    
         return response()->json([
             'status' => 200,
             'message' => 'Product added to cart successfully!',
             'items_in_cart' => $itemsInCart,
             'cart' => $userCarts,
         ], 200);
+    }
+
+    public function getItemInCart(Request $request)
+    {
+        $user = Auth::user();
+
+        $itemsInCart = Cart::where('user_id', $user->id)->count();
+
+
+        return response()->json(
+            [
+                'items_in_cart' => $itemsInCart
+            ],
+            200
+        );
+    }
+
+    public function userCart(Request $req){
+        $user = Auth::user();
+
+        $usercart = Cart::where('user_id', $user->id)->get();
+
+        $product = Product::where('id', $usercart->product_id)->first();
+
+        return response()->json(
+            [
+                'user' => $usercart
+            ],
+            200
+        );
     }
 }
