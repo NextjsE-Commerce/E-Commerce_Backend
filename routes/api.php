@@ -21,13 +21,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/addproduct', [HomeController::class, 'Addproduct']);
     Route::post('/logout', [HomeController::class, 'Logout']);
     Route::delete('/deleteproduct/{id}', [HomeController::class, 'Deleteproduct']);
+    Route::delete('/deletecart/{id}', [HomeController::class, 'DeleteCart']);
     Route::post('/products',[HomeController::class,'Products']);
     Route::post('/add_to_cart', [HomeController::class,'AddtoCart'] );
     Route::get('/itemincart', [HomeController::class, 'getItemInCart']);
     Route::post('/usercart', [HomeController::class, 'userCart']);
+    Route::post('/updatecart/{id}', [HomeController::class, 'updateCart']);
 });
 
 Route::post('/login',[HomeController::class,'Login']);
 Route::post('/register',[HomeController::class,'Register']);
 Route::post('/newproduct',[HomeController::class,'Newproduct']);
+Route::post('/productdetail/{id}', [HomeController::class, 'productDetail']);
 

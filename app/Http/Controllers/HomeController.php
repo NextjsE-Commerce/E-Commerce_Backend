@@ -118,7 +118,7 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
-        
+
 
         if ($user) {
 
@@ -220,6 +220,7 @@ class HomeController extends Controller
             'message' => "Product delated Successfully"
         ]);
     }
+
     public function AddtoCart(Request $request)
     {
 
@@ -239,13 +240,13 @@ class HomeController extends Controller
         $product = Product::find($request->product_id);
 
         $cart = Cart::where('user_id', $user->id)
-        ->where('product_id', $product->id)
-        ->first();
+            ->where('product_id', $product->id)
+            ->first();
 
 
         if ($cart) {
-            $cart->quantity += $request->quantity; 
-            $cart->price = $product->price * $cart->quantity; 
+            $cart->quantity += $request->quantity;
+            $cart->price = $product->price * $cart->quantity;
             $cart->image = $product->product_image;
             $cart->save();
         } else {
@@ -257,16 +258,32 @@ class HomeController extends Controller
             $cart->image = $product->product_image;
             $cart->save();
         }
-    
+
         $itemsInCart = Cart::where('user_id', $user->id)->count();
         $userCarts = Cart::where('user_id', $user->id)->get();
-    
+
         return response()->json([
             'status' => 200,
             'message' => 'Product added to cart successfully!',
             'items_in_cart' => $itemsInCart,
             'cart' => $userCarts,
         ], 200);
+    }
+
+    public function DeleteCart($id)
+    {
+        $user = Auth::user();
+
+        $data = Cart::find($id);
+        $data->delete();
+
+        $itemsInCart = Cart::where('user_id', $user->id)->count();
+
+        return response()->json([
+            'status' => 200,
+            'items_in_cart' => $itemsInCart,
+            'message' => "Product delated Successfully"
+        ]);
     }
 
     public function getItemInCart(Request $request)
@@ -284,37 +301,58 @@ class HomeController extends Controller
         );
     }
 
-    // public function userCart(Request $req){
-    //     $user = Auth::user();
-
-    //     $usercart = Cart::where('user_id', $user->id)->get();
-
-    //     $product = Product::where('id', $usercart->product_id)->first();
-
-    //     return response()->json(
-    //         [
-    //             'usercart' => $usercart,
-    //             'productstatus' => $product->product_status
-    //         ],
-    //         200
-    //     );
-    // }
-
-    public function userCart(Request $req) 
+    public function userCart(Request $req)
     {
-    $user = Auth::user();
-    $usercart = Cart::where('user_id', $user->id)
-        ->get()
-        ->map(function ($cartItem,) {
-            $product = Product::find($cartItem->product_id);
-            $cartItem->product_name = $product->product_name;
-            $cartItem->product_status = $product->product_status;
-            return $cartItem;
-        });
+        $user = Auth::user();
+        $usercart = Cart::where('user_id', $user->id)->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($cartItem,) {
+                $product = Product::find($cartItem->product_id);
+                $cartItem->product_name = $product->product_name;
+                $cartItem->product_status = $product->product_status;
+                return $cartItem;
+            });
 
-    return response()->json([
-        'usercart' => $usercart
-    ], 200);
-}
+        return response()->json([
+            'usercart' => $usercart
+        ], 200);
+    }
 
+    public function updateCart(Request $request, $id)
+    {
+        try {
+            $cart = Cart::findOrFail($id);
+            $cart->quantity = $request->quantity;
+            $cart->price = $request->price;
+            $cart->save();
+
+            return response()->json([
+                'message' => 'Cart updated successfully!',
+                'cart' => $cart,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating cart!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function productDetail($id)
+    {
+
+        $productdetail = Product::find($id);
+
+        if (!$productdetail) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'productdetail' => $productdetail
+        ], 200);
+    }
 }
