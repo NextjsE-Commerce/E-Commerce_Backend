@@ -183,18 +183,72 @@ class HomeController extends Controller
         ]);
     }
 
+    public function UpdateProduct(Request $req, $id)
+    {
+     
+            $validatepro = Validator::make($req->all(), [
+                'product_name' => 'required|String|max:50',
+                'category' => 'required|String|max:50',
+                'description' => 'required|String',
+                'product_status' => 'required|String',
+                'quantity' => 'required|string|max:10',
+                'price' => 'required|string|min:4',
+            ]);
+
+            if ($validatepro->fails()) {
+                return response()->json([
+                    'validate_err' => $validatepro->messages(),
+                ], 422);
+            }
+
+            $updproduct = Product::find($id);
+
+            $categoryId = Category::where("category_name", $req->category)->first();
+
+            $updproduct->product_name = $req->product_name;
+            $updproduct->category_id = $categoryId->id;
+            $updproduct->description = $req->description;
+            $updproduct->product_status = $req->product_status;
+            $updproduct->quantity = $req->quantity;
+            $updproduct->price = $req->price;
+
+            if ($req->hasFile('product_image')) {
+                $image = $req->file('product_image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('Products'), $imageName);
+                $updproduct->product_image = $imageName;
+            } else {
+                $updproduct->product_image = $updproduct->product_image;
+            }
+
+            $updproduct->save();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Product Updated Successfully!',
+            ]);
+    }
+
+
     public function Products()
     {
-        //   $product = Product::where('quantity', '>', 0)->paginate(9);
-        $product = Product::where('quantity', '>', 0)->orderBy('id', 'desc')->get();
-        $category = Category::orderBy('category_name', 'asc')->get();
+        $products = Product::where('quantity', '>', 0)->orderBy('id', 'desc')->get();
+        $categories = Category::pluck('category_name', 'id');
+
+
+        $products = $products->map(function ($product) use ($categories) {
+            $product->category = $categories[$product->category_id] ?? 'No Category';
+            return $product;
+        });
 
         return response()->json([
             'status' => 200,
-            'products' => $product,
-            'category' => $category,
+            'products' => $products,
         ]);
     }
+
+
+
 
     public function Newproduct()
     {
@@ -355,4 +409,76 @@ class HomeController extends Controller
             'productdetail' => $productdetail
         ], 200);
     }
+
+    // public function productDetailAdmin($id)
+    // {
+
+    //     $productdetailadmin = Product::where("id",$id)
+    //     ->get()
+    //     ->map(function ($Item,) {
+    //         $catgory = Category::find($Item->category_id);
+    //         $Item->category = $catgory->category_name;
+    //         return $Item;
+    //     });
+
+    //     if (!$productdetailadmin) {
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'Product not found'
+    //         ], 404);
+    //     }
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'productdetailadmin' => $productdetailadmin
+    //     ], 200);
+    // }
+
+//     public function productDetailAdmin($id)
+//    {
+//     $productdetailadmin = Product::where("id",$id)
+//     ->get()
+//     ->map(function ($Item) {
+//             $category = Category::find($Item->category_id);
+//             $Item->category = $category ? $category->category_name : null; // Handle case where category is not found
+//             return $Item;
+//         });
+
+//     if (!$productdetailadmin) {
+//         return response()->json([
+//             'status' => 'error',
+//             'message' => 'Product not found'
+//         ], 404);
+//     }
+
+//     return response()->json([
+//         'status' => 'success',
+//         'productdetailadmin' => $productdetailadmin
+//     ], 200);
+// }
+
+public function productDetailAdmin($id)
+{
+    // Fetch the product by ID
+    $product = Product::where("id", $id)->first();
+
+    // Check if the product exists
+    if (!$product) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Product not found'
+        ], 404);
+    }
+
+    // Attach the category name to the product
+    $category = Category::find($product->category_id);
+    $product->category = $category ? $category->category_name : null;
+
+    // Return the product in JSON format
+    return response()->json([
+        'status' => 'success',
+        'productdetailadmin' => $product
+    ], 200);
+}
+
 }

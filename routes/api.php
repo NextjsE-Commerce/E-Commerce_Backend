@@ -27,10 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/itemincart', [HomeController::class, 'getItemInCart']);
     Route::post('/usercart', [HomeController::class, 'userCart']);
     Route::post('/updatecart/{id}', [HomeController::class, 'updateCart']);
+    Route::post('/updateproduct/{id}', [HomeController::class, 'UpdateProduct']);
+    Route::get('/productdetailadmin/{id}', [HomeController::class, 'productDetailAdmin']);
 });
 
 Route::post('/login',[HomeController::class,'Login']);
 Route::post('/register',[HomeController::class,'Register']);
 Route::post('/newproduct',[HomeController::class,'Newproduct']);
 Route::post('/productdetail/{id}', [HomeController::class, 'productDetail']);
+// Route::post('/productdetailadmin/{id}', [HomeController::class, 'productDetailAdmin']);
 
