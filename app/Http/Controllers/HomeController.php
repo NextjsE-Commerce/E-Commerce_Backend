@@ -88,7 +88,7 @@ class HomeController extends Controller
             ]);
         }
 
-        $token = $user->createToken('API Token')->plainTextToken;
+        $token = $user->createToken( $user->id )->plainTextToken;
 
         return response()->json([
             'status' => 200,
@@ -156,7 +156,7 @@ class HomeController extends Controller
         }
 
         $product = new Product();
-
+       
         $categoryId = Category::where("category_name", $req->category)->first();
 
         $product->product_name = $req->product_name;
